@@ -1,0 +1,10 @@
+{
+  "notify_me": "Notify Me When Available",
+  "notify_price_drop": "Notify Me on Price Drop",
+  "email_label": "Email",
+  "phone_label": "Phone (optional)",
+  "consent": "I agree to receive notifications about this product.",
+  "submit": "Notify Me",
+  "success": "You're on the list.",
+  "error": "Something went wrong."
+}

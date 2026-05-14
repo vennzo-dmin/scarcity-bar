@@ -1,0 +1,210 @@
+{% if block.settings.enabled %}
+  <link rel="stylesheet" href="{{ 'scarcity-bar.css' | asset_url }}">
+  <script src="{{ 'scarcity-bar.js' | asset_url }}" defer></script>
+
+  <script id="sb-page-data-script">
+    window.sbPageData = {
+      shopDomain: {{ shop.permanent_domain | json }},
+      apiBase: {{ block.settings.api_base | default: '' | json }},
+      templateName: {{ template.name | json }},
+      currency: {{ shop.currency | json }},
+      moneyFormat: {{ shop.money_format | json }},
+      customerTags: {% if customer %}[{% for tag in customer.tags %}{{ tag | json }}{% unless forloop.last %}, {% endunless %}{% endfor %}]{% else %}[]{% endif %},
+      customerEmail: {% if customer %}{{ customer.email | json }}{% else %}null{% endif %},
+      customerId: {% if customer %}{{ customer.id }}{% else %}null{% endif %},
+      mount: {
+        selectorBuyButton: {{ block.settings.selector_buy_button | json }}
+      },
+      selectors: {
+        listingCardRoots: {{ block.settings.selector_listing_card_roots | default: '' | json }},
+        listingBarContainer: {{ block.settings.selector_listing_bar_container | default: '' | json }},
+        listingBarBefore: {{ block.settings.selector_listing_bar_before | default: '' | json }},
+        listingSkipLinkWithin: {{ block.settings.selector_listing_skip_link | default: '' | json }},
+        productAddToCartExtra: {{ block.settings.selector_product_add_to_cart_extra | default: '' | json }},
+        productVariantInput: {{ block.settings.selector_product_variant_input | default: '' | json }},
+        productCartForm: {{ block.settings.selector_product_cart_form | default: '' | json }}
+      },
+      product: {% if template.name == 'product' and product %}
+        {
+          "id": {{ product.id }},
+          "handle": {{ product.handle | json }},
+          "title": {{ product.title | json }},
+          "featured_image": {% if product.featured_image %}{{ product.featured_image | image_url: width: 600 | json }}{% else %}null{% endif %},
+          "collections": [
+            {%- for c in product.collections -%}
+              {{ c.id }}{%- unless forloop.last -%}, {% endunless -%}
+            {%- endfor -%}
+          ],
+          "variants": [
+            {%- for v in product.variants -%}
+              {
+                "id": {{ v.id }},
+                "title": {{ v.title | json }},
+                "available": {{ v.available | json }},
+                "inventory_quantity": {% if v.inventory_management != blank %}{{ v.inventory_quantity | json }}{% else %}null{% endif %},
+                "price": {{ v.price }},
+                "compare_at_price": {% if v.compare_at_price %}{{ v.compare_at_price }}{% else %}null{% endif %}
+              }{%- unless forloop.last -%},{% endunless -%}
+            {%- endfor -%}
+          ]
+        }
+      {% else %}
+        null
+      {% endif %},
+      listingProducts: {% if template.name == 'collection' and collection %}
+        [
+          {%- for p in collection.products limit: 48 -%}
+            {
+              "id": {{ p.id }},
+              "handle": {{ p.handle | json }},
+              "title": {{ p.title | json }},
+              "collections": [
+                {%- for c in p.collections -%}
+                  {{ c.id }}{%- unless forloop.last -%}, {% endunless -%}
+                {%- endfor -%}
+              ],
+              "variants": [
+                {%- for v in p.variants -%}
+                  {
+                    "id": {{ v.id }},
+                    "title": {{ v.title | json }},
+                    "available": {{ v.available | json }},
+                    "inventory_quantity": {% if v.inventory_management != blank %}{{ v.inventory_quantity | json }}{% else %}null{% endif %},
+                    "price": {{ v.price }},
+                    "compare_at_price": {% if v.compare_at_price %}{{ v.compare_at_price }}{% else %}null{% endif %}
+                  }{%- unless forloop.last -%},{% endunless -%}
+                {%- endfor -%}
+              ]
+            }{%- unless forloop.last -%},{% endunless -%}
+          {%- endfor -%}
+        ]
+      {% elsif template.name == 'search' and search and search.performed %}
+        [
+          {%- assign sb_count = 0 -%}
+          {%- assign sb_need_comma = false -%}
+          {%- for item in search.results -%}
+            {%- if item.object_type == 'product' and sb_count < 48 -%}
+              {%- if sb_need_comma -%},{%- endif -%}
+              {%- assign sb_need_comma = true -%}
+              {%- assign sb_count = sb_count | plus: 1 -%}
+              {
+                "id": {{ item.id }},
+                "handle": {{ item.handle | json }},
+                "title": {{ item.title | json }},
+                "collections": [
+                  {%- for c in item.collections -%}
+                    {{ c.id }}{%- unless forloop.last -%}, {% endunless -%}
+                  {%- endfor -%}
+                ],
+                "variants": [
+                  {%- for v in item.variants -%}
+                    {
+                      "id": {{ v.id }},
+                      "title": {{ v.title | json }},
+                      "available": {{ v.available | json }},
+                      "inventory_quantity": {% if v.inventory_management != blank %}{{ v.inventory_quantity | json }}{% else %}null{% endif %},
+                      "price": {{ v.price }},
+                      "compare_at_price": {% if v.compare_at_price %}{{ v.compare_at_price }}{% else %}null{% endif %}
+                    }{%- unless forloop.last -%},{% endunless -%}
+                  {%- endfor -%}
+                ]
+              }
+            {%- endif -%}
+          {%- endfor -%}
+        ]
+      {% else %}
+        null
+      {% endif %}
+    };
+  </script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Scarcity Bar",
+  "target": "body",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Enable Scarcity Bar",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "api_base",
+      "label": "App URL (your Laravel APP_URL, no trailing slash)",
+      "default": "https://scarcitybar.test",
+      "info": "Example: https://your-app.com — must match the domain hosting /api/storefront/* routes."
+    },
+    {
+      "type": "select",
+      "id": "selector_buy_button",
+      "label": "Anchor selector (advanced)",
+      "options": [
+        { "value": "form[action*='/cart/add'] [type='submit']", "label": "Dawn / default — submit inside add-to-cart form" },
+        { "value": "form[action*='/cart/add']", "label": "Entire add-to-cart form" },
+        { "value": "[data-add-to-cart]", "label": "data-add-to-cart button" }
+      ],
+      "default": "form[action*='/cart/add'] [type='submit']"
+    },
+    {
+      "type": "header",
+      "content": "Theme compatibility (optional)"
+    },
+    {
+      "type": "paragraph",
+      "content": "Leave blank for automatic behavior on most Online Store 2.0 themes. Comma-separated CSS selectors: first match wins; invalid selectors are skipped. For urgent fixes, merchants can inject window.sbThemeSelectorsOverride = { listingBarContainer: '.my-wrap', ... } in theme code (same keys as these fields) without republishing the embed."
+    },
+    {
+      "type": "textarea",
+      "id": "selector_product_add_to_cart_extra",
+      "label": "Product page — extra add-to-cart anchors",
+      "placeholder": "[data-add-to-cart], .product-form__submit, #ProductSubmitButton",
+      "info": "Tried in order after the dropdown above and your app’s buy-button setting. Helps themes that do not use a standard cart form."
+    },
+    {
+      "type": "textarea",
+      "id": "selector_product_cart_form",
+      "label": "Product page — cart form (optional)",
+      "placeholder": "form#product-form-installment, #product-form",
+      "info": "If the theme does not use form[action*='/cart/add'], set the add-to-cart form selector here (comma-separated, first match). Used with the variant field below."
+    },
+    {
+      "type": "textarea",
+      "id": "selector_product_variant_input",
+      "label": "Product page — variant id field (optional)",
+      "placeholder": "select[name=id], input[name=id], [data-variant-id]",
+      "info": "If blank, uses [name=id] inside the cart form, then ?variant= in the URL. For support tickets you can also set window.sbThemeSelectorsOverride in the theme (same keys as here) without republishing the app embed."
+    },
+    {
+      "type": "textarea",
+      "id": "selector_listing_card_roots",
+      "label": "Collection / search — product card root",
+      "placeholder": ".card-wrapper, .grid__item, [data-product-grid-item]",
+      "info": "From each product link, closest() is tried for each selector (in order). Used to detect the card boundary and avoid double widgets. If blank, built-in defaults are used."
+    },
+    {
+      "type": "textarea",
+      "id": "selector_listing_bar_container",
+      "label": "Collection / search — bar mount container",
+      "placeholder": ".card__content, .product-card__info",
+      "info": "From the product link, closest() for each selector: the scarcity bar is appended here (or before the element below). If blank, placement is auto-detected (e.g. Dawn after price)."
+    },
+    {
+      "type": "textarea",
+      "id": "selector_listing_bar_before",
+      "label": "Collection / search — insert bar before",
+      "placeholder": ".card__badge, .product-card__badge",
+      "info": "Optional. First matching element inside the mount container; the bar is inserted before it. If blank, the bar goes at the end of the container."
+    },
+    {
+      "type": "textarea",
+      "id": "selector_listing_skip_link",
+      "label": "Collection / search — skip product links inside",
+      "placeholder": ".card__inner, .product-card__media",
+      "info": "Links inside this region are ignored when choosing the anchor (reduces duplicate title links). If blank, defaults to skipping Dawn-style .card__inner."
+    }
+  ]
+}
+{% endschema %}

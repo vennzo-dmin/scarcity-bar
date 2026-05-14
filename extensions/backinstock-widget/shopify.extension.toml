@@ -1,0 +1,7 @@
+api_version = "2026-04"
+uid = "a4625ef2-dbcd-5ba2-f695-e6d427fa40cf8d0e9c11"
+
+[[extensions]]
+type = "theme"
+name = "Scarcity Bar storefront"
+handle = "backinstock-widget"

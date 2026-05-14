@@ -1,0 +1,322 @@
+/* Scarcity Bar — storefront widget (isolated prefix: sb-) */
+.sb-root {
+  --sb-track: #e5e7eb;
+  --sb-fill: #16a34a;
+  --sb-text: #0f172a;
+  --sb-muted: #64748b;
+  font-family: inherit;
+  color: var(--sb-text);
+  margin: 12px 0 14px;
+  max-width: 560px;
+}
+
+.sb-root * { box-sizing: border-box; }
+
+.sb-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sb-stock, .sb-notify {
+  border-radius: 12px;
+  padding: 14px 14px 12px;
+  background: #fafafa;
+  border: 1px solid #ececec;
+}
+
+.sb-notify { background: #fff; }
+
+.sb-pd-card {
+  border-radius: 12px;
+  padding: 14px 14px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.sb-pd-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.sb-pd-sub {
+  font-size: 13px;
+  color: var(--sb-muted);
+  margin: 0 0 10px;
+  line-height: 1.45;
+}
+
+.sb-pd-open--btn {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background: #1e293b;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.sb-pd-open--link {
+  border: none;
+  background: transparent;
+  color: #4f46e5;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.sb-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100002;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.sb-modal.sb-hidden {
+  display: none !important;
+}
+
+.sb-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  z-index: 0;
+}
+
+.sb-modal-panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  margin-top: 8vh;
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+}
+
+.sb-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #64748b;
+}
+
+.sb-modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 36px 10px 0;
+}
+
+.sb-hidden { display: none !important; }
+
+.sb-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.sb-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 22px;
+}
+
+.sb-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--sb-fill);
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sb-fill) 28%, transparent);
+}
+
+.sb-dot.sb-pulse {
+  animation: sb-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes sb-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.75; }
+}
+
+.sb-label {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+
+.sb-sub {
+  font-size: 13px;
+  color: var(--sb-muted);
+  font-weight: 500;
+  text-align: right;
+  line-height: 1.35;
+}
+
+.sb-track {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--sb-track);
+  overflow: hidden;
+  position: relative;
+}
+
+.sb-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  height: auto;
+  width: 0%;
+  min-width: 0;
+  border-radius: inherit;
+  z-index: 1;
+  /* Solid fill first — browsers that reject color-mix() would drop a combined shorthand and show no fill (gray track only). */
+  background-color: var(--sb-fill);
+  /* No color-mix() here — gradient is a light overlay only (works everywhere). */
+  background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.14), transparent);
+  transition: width 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+ * Collection / search grids: themes often set `background: transparent` on nested divs
+ * inside product cards (higher specificity than a single class). Without this, only
+ * the track shows — green dot + label look correct but the bar looks “all gray”.
+ */
+div.sb-root.sb-listing .sb-track,
+#sb-widget-root .sb-track {
+  background-color: var(--sb-track) !important;
+  background-image: none !important;
+}
+
+div.sb-root.sb-listing .sb-track .sb-fill,
+#sb-widget-root .sb-track .sb-fill {
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  background-color: var(--sb-fill) !important;
+  background-image: linear-gradient(90deg, rgba(0, 0, 0, 0.14), transparent) !important;
+}
+
+.sb-fill.sb-animated::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+  transform: translateX(-100%);
+  animation: sb-shine 2.2s ease-in-out infinite;
+}
+
+@keyframes sb-shine {
+  0% { transform: translateX(-100%); opacity: 0; }
+  35% { opacity: 1; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+
+.sb-notify-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.sb-notify-sub {
+  font-size: 13px;
+  color: var(--sb-muted);
+  margin: 0 0 12px;
+}
+
+.sb-field { margin-bottom: 10px; }
+.sb-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 4px;
+}
+.sb-field input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+}
+.sb-field input:focus {
+  outline: none;
+  border-color: #0f172a;
+  box-shadow: 0 0 0 3px rgba(15,23,42,.08);
+}
+.sb-field input.sb-invalid { border-color: #dc2626; }
+
+.sb-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: #64748b;
+  margin: 2px 0 10px;
+}
+.sb-consent input { margin-top: 3px; }
+
+.sb-submit {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background: #111827;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+}
+.sb-submit:disabled { opacity: .6; cursor: default; }
+
+.sb-msg { margin-top: 8px; font-size: 13px; color: #64748b; min-height: 18px; }
+.sb-msg.sb-success { color: #059669; }
+.sb-msg.sb-error { color: #dc2626; }
+
+.sb-field-err { color: #dc2626; font-size: 12px; margin-top: 4px; min-height: 0; }
+.sb-field-err:empty { display: none; }
+
+/* Listing cards — compact; Dawn: inside .card__content after price */
+.sb-root.sb-listing {
+  max-width: none;
+  margin: 8px 0 0;
+}
+.card__content > .sb-root.sb-listing {
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+.sb-root.sb-listing .sb-stock {
+  padding: 10px 10px 8px;
+  border-radius: 10px;
+}
+.sb-root.sb-listing .sb-label { font-size: 13px; }
+.sb-root.sb-listing .sb-sub { font-size: 12px; }
+.sb-root.sb-listing .sb-track { height: 8px; }
+
+@media (max-width: 600px) {
+  .sb-sub { text-align: left; }
+  .sb-row-top { flex-direction: column; align-items: flex-start; }
+}
