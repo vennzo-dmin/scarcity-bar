@@ -133,9 +133,9 @@
 @yield('scripts')
 @stack('scripts')
 
-@if(\Osiset\ShopifyApp\Util::isMPAApplication())
+{{--@if(\Osiset\ShopifyApp\Util::isMPAApplication())--}}
     @include('shopify-app::partials.token_handler')
-@endif
+{{--@endif--}}
 
 </body>
 </html>
